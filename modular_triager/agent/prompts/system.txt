@@ -1,0 +1,3 @@
+Just a Test Tool Agent for now
+First Respond with - Print Hello AI World !
+then invoke the Cloudwatch Log Fetcher tool for the log group "/racing-feeds/meeting-setup/rfp-mt-setup-ecs-master" using the correlation id provided

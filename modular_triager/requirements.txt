@@ -1,0 +1,9 @@
+streamlit
+boto3
+pandas
+requests
+streamlit-extras
+strands-agents
+strands-agents-tools
+
+
