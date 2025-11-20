@@ -1,0 +1,26 @@
+name: branch-lint
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+
+  lint:
+    name: lint
+    # runs-on: [self-hosted, linux]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run yamllint
+        run: yamllint -c ./.github/linters/.yaml-lint.yml . -f parsable
