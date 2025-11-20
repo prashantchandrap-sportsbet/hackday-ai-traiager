@@ -3,6 +3,7 @@ from agent.agent_factory import create_agent
 st.set_page_config(layout="wide")
 from datetime import datetime, time
 from tools.cloudwatch_log_fetcher import cloudwatch_log_fetcher
+from tools.s3_data_fetcher import get_s3_data
 
 def get_user_input():
     log_group = st.text_input("Log Group Name", "/smf-racing/feed-adapter-betmakers-coreapi-dev")
@@ -65,3 +66,45 @@ if st.button("Fetch & Summarize Logs"):
     assistant_message = result.message["content"][0]["text"]
     with st.expander(" Response"):
         st.text(assistant_message)
+
+st.divider()
+st.subheader("S3 Data Fetcher")
+
+def get_s3_input():
+    bucket_name = st.text_input("S3 Bucket Name", "your-bucket-name")
+    s3_key = st.text_input("S3 Key (path to JSON file)", "path/to/file.json")
+    fields_input = st.text_input("Fields to Extract (comma-separated)", "id,created,updated")
+    region_name = st.text_input("AWS Region", "ap-southeast-2")
+    
+    # Parse fields from comma-separated string
+    fields = [field.strip() for field in fields_input.split(",") if field.strip()]
+    
+    return {
+        "bucket_name": bucket_name,
+        "s3_key": s3_key,
+        "fields": fields,
+        "region_name": region_name
+    }
+
+s3_input = get_s3_input()
+
+if st.button("Fetch S3 Data"):
+    try:
+        with st.spinner("Fetching data from S3..."):
+            result = get_s3_data(
+                bucket_name=s3_input["bucket_name"],
+                s3_key=s3_input["s3_key"],
+                fields=s3_input["fields"],
+                region_name=s3_input["region_name"]
+            )
+        
+        st.success("Data fetched successfully!")
+        
+        with st.expander("Extracted Fields", expanded=True):
+            st.json(result["extracted_fields"])
+        
+        with st.expander("Full JSON Data"):
+            st.json(result["full_json"])
+    
+    except Exception as e:
+        st.error(f"Error fetching S3 data: {str(e)}")
