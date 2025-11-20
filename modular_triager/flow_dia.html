@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Data Management System - Interactive Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 60px 40px;
+            min-height: 600px;
+            position: relative;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+        }
+
+        .step h2 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .step p {
+            font-size: 1.1em;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .step ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .step li {
+            font-size: 1.05em;
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        /* Animations for visual elements */
+        .animation-box {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .data-box {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            margin: 10px;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .data-box:nth-child(1) { animation-delay: 0s; }
+        .data-box:nth-child(2) { animation-delay: 0.3s; }
+        .data-box:nth-child(3) { animation-delay: 0.6s; }
+        .data-box:nth-child(4) { animation-delay: 0.9s; }
+        .data-box:nth-child(5) { animation-delay: 1.2s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .arrow {
+            font-size: 1.5em;
+            color: #667eea;
+            margin: 0 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .benefit-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 1.05em;
+            color: #2e7d32;
+        }
+
+        .benefit-box strong {
+            color: #1b5e20;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 30px;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.6s; }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 50%;
+            margin-right: 20px;
+            margin-top: 5px;
+            flex-shrink: 0;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-content h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .timeline-content p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 30px 40px;
+            background: #f5f5f5;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .step-indicator {
+            text-align: center;
+            color: #666;
+            font-size: 0.95em;
+            margin-top: 15px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 40px 20px;
+            }
+
+            .data-flow {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+
+            .step h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Race Data Management System</h1>
+            <p>How AI Automation Saves Time for Support Developers</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="content">
+            <!-- Step 1: Introduction -->
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <h2>The Challenge</h2>
+                <p>Support Developers need to manage race data updates across multiple platforms. Traditionally, this involves:</p>
+                <ul>
+                    <li>Manually searching through multiple data sources</li>
+                    <li>Analyzing logs from different systems</li>
+                    <li>Compiling information from various feeds</li>
+                    <li>Creating reports and summaries</li>
+                </ul>
+                <div class="benefit-box">
+                    <strong>⏱️ Time Cost:</strong> 30-45 minutes per race update request
+                </div>
+            </div>
+
+            <!-- Step 2: User Request -->
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <h2>Step 1: User Initiates Request</h2>
+                <div class="icon">💬</div>
+                <p>A Support Developer simply sends a request through the <span class="highlight">UI/Chatbot</span>:</p>
+                <div class="animation-box">
+                    <p><strong>Example:</strong> "Get me the latest race updates and any issues for Race #12345"</p>
+                </div>
+                <p>No need to manually navigate multiple systems or write complex queries.</p>
+            </div>
+
+            <!-- Step 3: Configuration & Planning -->
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <h2>Step 2: Intelligent Planning</h2>
+                <div class="icon">⚙️</div>
+                <p>The system automatically:</p>
+                <div class="data-flow">
+                    <div class="data-box">Fetches Config</div>
+                    <div class="arrow">→</div>
+                    <div class="data-box">Creates Plan</div>
+                    <div class="arrow">→</div>
+                    <div class="data-box">Identifies Tools</div>
+                </div>
+                <p>The <span class="highlight">Bedrock LLM</span> creates an optimized execution plan based on system configuration and tools available.</p>
+                <div class="benefit-box">
+                    <strong>✓ Benefit:</strong> Eliminates manual planning – system knows exactly what to do
+                </div>
+            </div>
+
+            <!-- Step 4: Data Retrieval -->
+            <div class="step" id="step4">
+                <div class="step-number">4</div>
+                <h2>Step 3: Automated Data Retrieval</h2>
+                <div class="icon">🔍</div>
+                <p>The system searches across multiple data sources in parallel:</p>
+                <div class="animation-box">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>AWS Open Search</h4>
+                                <p>Retrieves indexed race data from S3 vectors</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Betmaker Feed Adapter</h4>
+                                <p>Pulls real-time betting data</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Racing Entities</h4>
+                                <p>Fetches race-specific information</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="benefit-box">
+                    <strong>✓ Benefit:</strong> Parallel processing – retrieves all data simultaneously instead of sequential searches
+                </div>
+            </div>
+
+            <!-- Step 5: Log Analysis -->
+            <div class="step" id="step5">
+                <div class="step-number">5</div>
+                <h2>Step 4: Intelligent Log Analysis</h2>
+                <div class="icon">📊</div>
+                <p>The system sends CloudWatch logs to the LLM for intelligent analysis:</p>
+                <div class="animation-box">
+                    <p><strong>The LLM automatically:</strong></p>
+                    <ul>
+                        <li>Summarizes log entries</li>
+                        <li>Identifies critical issues</li>
+                        <li>Highlights anomalies</li>
+                        <li>Prioritizes problems by severity</li>
+                    </ul>
+                </div>
+                <div class="benefit-box">
+                    <strong>✓ Benefit:</strong> AI-powered analysis – no manual log reading required. Issues are automatically flagged.
+                </div>
+            </div>
+
+            <!-- Step 6: Summary Generation -->
+            <div class="step" id="step6">
+                <div class="step-number">6</div>
+                <h2>Step 5: Automated Summary</h2>
+                <div class="icon">📋</div>
+                <p>The Trigger Agent compiles all data into a comprehensive summary:</p>
+                <div class="animation-box">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Race Status Overview</h4>
+                                <p>Current state and key metrics</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Active Issues</h4>
+                                <p>Problems detected with severity levels</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Platform-Wide Impact</h4>
+                                <p>How changes affect all systems</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="benefit-box">
+                    <strong>✓ Benefit:</strong> Comprehensive insights generated automatically – saves hours of manual compilation
+                </div>
+            </div>
+
+            <!-- Step 7: Formatted Response -->
+            <div class="step" id="step7">
+                <div class="step-number">7</div>
+                <h2>Step 6: Formatted Response</h2>
+                <div class="icon">✨</div>
+                <p>The system delivers a professionally formatted response with:</p>
+                <div class="animation-box">
+                    <div class="data-flow">
+                        <div class="data-box">Timeline View</div>
+                        <div class="arrow">+</div>
+                        <div class="data-box">Issue Details</div>
+                        <div class="arrow">+</div>
+                        <div class="data-box">Recommendations</div>
+                    </div>
+                </div>
+                <p>All presented in an easy-to-understand format through the <span class="highlight">UI/Chatbot</span>.</p>
+                <div class="benefit-box">
+                    <strong>✓ Benefit:</strong> Professional output ready to share – no additional formatting needed
+                </div>
+            </div>
+
+            <!-- Step 8: Results & Impact -->
+            <div class="step" id="step8">
+                <div class="step-number">8</div>
+                <h2>Results & Time Savings</h2>
+                <div class="icon">🎯</div>
+                <p><strong>Before vs. After Automation:</strong></p>
+                <div class="animation-box">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Manual Process</h4>
+                                <p><strong>30-45 minutes</strong> per request</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Automated Process</h4>
+                                <p><strong>2-3 minutes</strong> per request</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Time Saved</h4>
+                                <p><strong>90% reduction</strong> in processing time</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="benefit-box">
+                    <strong>💡 Key Benefits:</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>✓ Faster response times to support requests</li>
+                        <li>✓ Reduced manual errors</li>
+                        <li>✓ More time for strategic work</li>
+                        <li>✓ 24/7 availability of the system</li>
+                        <li>✓ Consistent, high-quality outputs</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 9: Conclusion -->
+            <div class="step" id="step9">
+                <div class="step-number">9</div>
+                <h2>Transforming Support Operations</h2>
+                <div class="icon">🚀</div>
+                <p>This intelligent system empowers Support Developers to:</p>
+                <ul>
+                    <li><strong>Work Smarter:</strong> Focus on analysis and decision-making, not data gathering</li>
+                    <li><strong>Respond Faster:</strong> Deliver insights in minutes instead of hours</li>
+                    <li><strong>Scale Efficiently:</strong> Handle more requests without proportional increase in effort</li>
+                    <li><strong>Improve Quality:</strong> Consistent, AI-verified outputs reduce human error</li>
+                </ul>
+                <div class="benefit-box">
+                    <strong>📈 Business Impact:</strong> Increased productivity, faster issue resolution, and improved customer satisfaction
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn" onclick="changeStep(-1)">← Previous</button>
+            <button id="playBtn" onclick="autoPlay()">▶ Play All</button>
+            <button id="nextBtn" onclick="changeStep(1)">Next →</button>
+        </div>
+
+        <div class="step-indicator">
+            <span id="stepCounter">Step 1 of 9</span>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 9;
+        let isAutoPlaying = false;
+
+        function showStep(n) {
+            // Hide all steps
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => step.classList.remove('active'));
+
+            // Show current step
+            const currentStepElement = document.getElementById(`step${n}`);
+            if (currentStepElement) {
+                currentStepElement.classList.add('active');
+            }
+
+            // Update progress bar
+            const progress = (n / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            // Update step counter
+            document.getElementById('stepCounter').textContent = `Step ${n} of ${totalSteps}`;
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = n === 1;
+            document.getElementById('nextBtn').disabled = n === totalSteps;
+
+            // Scroll to top
+            document.querySelector('.content').scrollTop = 0;
+        }
+
+        function changeStep(n) {
+            currentStep += n;
+            if (currentStep < 1) currentStep = 1;
+            if (currentStep > totalSteps) currentStep = totalSteps;
+            showStep(currentStep);
+        }
+
+        function autoPlay() {
+            if (isAutoPlaying) {
+                isAutoPlaying = false;
+                document.getElementById('playBtn').textContent = '▶ Play All';
+                return;
+            }
+
+            isAutoPlaying = true;
+            document.getElementById('playBtn').textContent = '⏸ Pause';
+            currentStep = 1;
+            showStep(currentStep);
+
+            const interval = setInterval(() => {
+                if (!isAutoPlaying || currentStep >= totalSteps) {
+                    isAutoPlaying = false;
+                    document.getElementById('playBtn').textContent = '▶ Play All';
+                    clearInterval(interval);
+                    return;
+                }
+                currentStep++;
+                showStep(currentStep);
+            }, 3000); // 3 seconds per step
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeStep(-1);
+            if (e.key === 'ArrowRight') changeStep(1);
+        });
+
+        // Initialize
+        showStep(1);
+    </script>
+</body>
+</html>
